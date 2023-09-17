@@ -1,37 +1,47 @@
-from dataloaders.StaticDataloaders.dataloader import dataset
-from utils_train import train, test, setup_seed
-from models.RGBModel.snn_resnet import ResNet19
-from models.BlackModel.snn_resnet import ResNet19 as C1_Resnet19
+from dataloaders.dataloader import dataset
+import utils
 from config import get_args
-
 from tqdm import tqdm
 import torch.nn as nn
 import torch
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 def main():
     args = get_args()
-    trainset, valset, n_class = dataset(args.dataset)
+    utils.set_seed(args.seed)
+    trainset, valset, in_features, n_classes = dataset(args.dataset, data_dir=args.data_dir)
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4,
-                                            worker_init_fn=lambda k: setup_seed(args.seed + k + 1))
+                                            shuffle=True, pin_memory=True, num_workers=4)
     val_loader = torch.utils.data.DataLoader(valset, batch_size=args.batch_size,
-                                            shuffle=False, pin_memory=True, num_workers=4,
-                                            worker_init_fn=lambda k: setup_seed(args.seed + k + 1)) 
-    model = ResNet19(num_classes=n_class, total_timestep=args.timestep).cuda()
+                                            shuffle=False, pin_memory=True, num_workers=4) 
+    model = utils.net_model(args.model_name, in_features, n_classes, args.timestep).cuda()
     criterion = nn.CrossEntropyLoss()
+    
+    # The optimizers are to be set
     optimizer = torch.optim.SGD(model.parameters(), args.learning_rate, args.momentum, args.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=int(args.epochs),
                                                                        eta_min= 0)
     
     epochs = args.epochs
     best_acc = .0
+    acc_list = []
+    loss_list = []
     for epoch in range(epochs):
-        loss = train(train_loader, model, criterion, optimizer, scheduler)
-        acc = test(model, val_loader)
+        loss = utils.train(model, train_loader, criterion, optimizer, scheduler)
+        acc = utils.test(model, val_loader)
         if acc > best_acc:
             best_acc = acc
-        print('epoch: ', epoch, 'loss: ', loss, 'acc: ', acc, 'best_acc: ', best_acc)
+        print(f'epoch:{epoch}, loss:{loss:.6f}, acc:{acc:.2f}, best_acc:{best_acc:.2f}')
+        
+        acc_list.append(acc)
+        loss_list.append(loss)
+    
+    # Store the Result
+    args_dict = vars(args)
+    args_dict['acc_list'] = acc_list
+    args_dict['loss_list'] = loss_list
+    file_dir = './Exp_Result'
+    file_name = f'optim{args.optimizer}_lr{args.learning_rate}_weightdecay{args.weight_decay}.pkl'
+    utils.dump_json(args_dict, file_dir, file_name)
 
-main()
+if __name__ == '__main__':
+    main()

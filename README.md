@@ -1,3 +1,3 @@
-# The BachBone For Our Research
+# The BenchMark For the Furture Research
 
-made by Yuhong Chou, XJTU.
+made by Yuhong Chou

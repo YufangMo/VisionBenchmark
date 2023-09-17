@@ -1,0 +1,25 @@
+{
+    "exp_name": "snn_pruning",
+    "data_dir": "/home/yuhong/Projects/Data/",
+    "dataset": "mnist",
+    "seed": 42,
+    "model_name": "vgg16",
+    "timestep": 1,
+    "batch_size": 128,
+    "optimizer": "sgd",
+    "scheduler": "cosine",
+    "learning_rate": 0.1,
+    "momentum": 0.9,
+    "weight_decay": 0.0005,
+    "epochs": 3,
+    "acc_list": [
+        95.9,
+        97.42,
+        97.94
+    ],
+    "loss_list": [
+        0.11560428887605667,
+        0.11474937200546265,
+        0.08350781351327896
+    ]
+}

@@ -62,6 +62,9 @@ def data_transforms(dataset):
     if dataset == 'fmnist':
         MEAN = [0.5]
         STD = [0.5]
+    elif dataset == 'mnist':
+        MEAN = [0.1307]
+        STD = [0.3081]
     elif dataset == 'svhn':
         MEAN = [0.5,0.5,0.5]
         STD = [0.5,0.5,0.5]
@@ -81,6 +84,20 @@ def data_transforms(dataset):
             transforms.Resize(32),
             transforms.RandomCrop(32, padding=4),
             transforms.ToTensor(),
+            transforms.Normalize(MEAN, STD)
+        ])
+
+        valid_transform = transforms.Compose([
+            transforms.Resize(32),
+            transforms.ToTensor(),
+            transforms.Normalize(MEAN, STD)
+        ])
+    
+    elif  (dataset== 'mnist'):
+        train_transform = transforms.Compose([
+            # If the size is too small, for vgg, after poolings, it will be error
+            transforms.Resize(32),
+            transforms.ToTensor(), 
             transforms.Normalize(MEAN, STD)
         ])
 

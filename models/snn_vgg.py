@@ -63,9 +63,9 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_layers(cfg: List[Union[str, int]], batch_norm: bool = False) -> nn.Sequential:
+def make_layers(in_features: int, cfg: List[Union[str, int]], batch_norm: bool = False) -> nn.Sequential:
     layers: List[nn.Module] = []
-    in_channels = 1
+    in_channels = in_features
     for v in cfg:
         if v == "M":
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
@@ -102,10 +102,10 @@ cfgs: Dict[str, List[Union[str, int]]] = {
 }
 
 
-def _vgg(arch: str, cfg: str, batch_norm: bool, pretrained: bool, progress: bool, **kwargs: Any) -> VGG:
+def _vgg(in_features:int, arch: str, cfg: str, batch_norm: bool, pretrained: bool, progress: bool, **kwargs: Any) -> VGG:
     if pretrained:
         kwargs["init_weights"] = False
-    model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
+    model = VGG(make_layers(in_features, cfgs[cfg], batch_norm=batch_norm), **kwargs)
     return model
 
 
@@ -169,7 +169,7 @@ def vgg16(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG
     return _vgg("vgg16", "D", False, pretrained, progress, **kwargs)
 
 
-def vgg16_bn(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG:
+def vgg16_bn(in_features:int, pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG:
     r"""VGG 16-layer model (configuration "D") with batch normalization
     `"Very Deep Convolutional Networks For Large-Scale Image Recognition" <https://arxiv.org/pdf/1409.1556.pdf>`_.
     The required minimum input size of the model is 32x32.
@@ -178,7 +178,7 @@ def vgg16_bn(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _vgg("vgg16_bn", "D", True, pretrained, progress, **kwargs)
+    return _vgg(in_features, "vgg16_bn", "D", True, pretrained, progress, **kwargs)
 
 
 def vgg19(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG:

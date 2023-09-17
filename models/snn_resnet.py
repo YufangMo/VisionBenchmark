@@ -53,12 +53,12 @@ class BasicBlock(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10, total_timestep =6):
+    def __init__(self, block, num_blocks, in_features, num_classes=10, total_timestep =6):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.total_timestep = total_timestep
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(in_features, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
 
         self.lif_input = neuron.LIFNode(v_threshold=1.0, v_reset=0.0, tau=tau_global,
@@ -129,8 +129,8 @@ class ResNet(nn.Module):
 def resnet18():
     return ResNet(BasicBlock, [2,2,2,2])
 
-def ResNet19(num_classes, total_timestep):
-    return ResNet(BasicBlock, [3,3,2], num_classes, total_timestep)
+def ResNet19(in_features, num_classes, total_timestep):
+    return ResNet(BasicBlock, [3,3,2], in_features, num_classes, total_timestep)
 
 def ResNet34():
     return ResNet(BasicBlock, [3,4,6,3])
